@@ -28,7 +28,7 @@ printf "Compute Betweenness Values...\n\n"
 printf "Generate Data for Random Walk...\n\n"
 
 python generate_outliers.py data Betweenness human_genes
-python construct_bipartite_graph.py data patient_ids InfluenceMatrix MutationMatrix OutliersMatrix
+python construct_bipartite_graph.py data patient_ids IntAct_network BRCA_mutations OutliersMatrix
 
 #########################################################
 #

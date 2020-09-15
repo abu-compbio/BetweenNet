@@ -15,7 +15,7 @@ class Data_Preprocessing:
                     inf_graph[line[0]]=[line[1]]
                 else:
                     inf_graph[line[0]].append(line[1])
-                
+
                 if line[1] not in inf_graph:
                     inf_graph[line[1]]=[line[0]]
                 else:
@@ -23,32 +23,35 @@ class Data_Preprocessing:
 
         return inf_graph
 
-    def load_mutations_matrix(file):
-        mutation_data=pd.read_csv("../"+input_directory+"/"+file+".csv",sep="\t")
-        patients_mut=[pat for pat in mutation_data["Genes"]]
+    def load_mutations(file):
+        mutation_data=open("../"+input_directory+"/"+file+".txt","r")
         patients_vs_mutations={}
         gene_vs_patients={}
         all_mutations=set()
-        i=0
-        for pat in patients:
-            if pat in patients_mut:
-                patient_row = mutation_data.loc[mutation_data['Genes'] == pat]
-                idx=list(patient_row.index)[0]
-                mutations_for_spec_patient=[cols for cols in patient_row if str(patient_row.get_value(idx, cols, takeable=False)) == "1"]
-                for g in mutations_for_spec_patient:
-                    all_mutations.add(g)
-                    if g not in gene_vs_patients:
-                        gene_vs_patients[g]=set()
-                        gene_vs_patients[g].add(pat)
-                    else:
-                        gene_vs_patients[g].add(pat)
-                patients_vs_mutations[pat]=mutations_for_spec_patient
+
+        for line in mutation_data.readlines():
+
+            pat=line.strip().split("\t")[0]
+            patients.append(pat)
+            genes=line.strip().split("\t")[1].split(",")
+
+            for gene in genes:
+
+                all_mutations.add(gene)
+                if gene not in gene_vs_patients:
+                    gene_vs_patients[gene]=set()
+                    gene_vs_patients[gene].add(pat)
+                else:
+                    gene_vs_patients[gene].add(pat)
+
+            patients_vs_mutations[pat]=genes
+        mutation_data.close()
         return all_mutations,patients_vs_mutations,gene_vs_patients
 
 
     def load_outliers_matrix(file):
         outliers_data=pd.read_csv("../"+input_directory+"/"+file+".csv")
-        outliers_data=outliers_data.set_index(outliers_data["Genes"])
+        outliers_data=outliers_data.set_index(outliers_data["Unnamed: 0"])
         patients_in_outliers_data=[col for col in outliers_data.index]
         outliers_data=outliers_data.transpose()
         all_outliers=set()
@@ -82,7 +85,7 @@ class Data_Preprocessing:
 
 class Graph:
     def construct_bipartite_graph(patient_mutations,patient_outliers):
-    
+
         G = nx.Graph()
         G.add_nodes_from(mutated_genes, bipartite=0)
         G.add_nodes_from(outlier_genes, bipartite=1)
@@ -94,9 +97,11 @@ class Graph:
 
                 for outlier in patient_outliers[pat]:
                     if outlier in inf_graph:
+                        if outlier in patient_mutations[pat]:
+                            continue
                         for mutation in patient_mutations[pat]:
                             if mutation in inf_graph:
-                                
+
                                 if mutation in inf_graph[outlier]:
                                     outlier_=outlier+str("_")+pat
                                     G.add_edges_from([(mutation,outlier_ )])
@@ -144,6 +149,7 @@ def main():
     print("3 - Construct Bipartite Graph")
     global patients,mutated_genes,outlier_genes,inf_graph
     global input_directory
+    global patiens
     # count the arguments
     arguments = len(sys.argv) - 1
     if arguments < 4:
@@ -160,14 +166,14 @@ def main():
     mutations_matrix=sys.argv[4]
     outliers_matrix=sys.argv[5]
 
-
-    with open("../"+input_directory+"/"+patients_ids+".txt") as ifile:
-        patients=[pat.strip() for pat in ifile.readlines()]
+    patients=[]
+    #with open("../"+input_directory+"/"+patients_ids+".txt") as ifile:
+    #        patients=[pat.strip() for pat in ifile.readlines()]
 
 
     #load data
     inf_graph=Data_Preprocessing.load_inf_graph(influence_matrix)
-    mutated_genes,patient_mutations,mutation_patients=Data_Preprocessing.load_mutations_matrix(mutations_matrix)
+    mutated_genes,patient_mutations,mutation_patients=Data_Preprocessing.load_mutations(mutations_matrix)
 
     outlier_genes,patient_outliers,outlier_patients=Data_Preprocessing.load_outliers_matrix(outliers_matrix)
     G=Graph.construct_bipartite_graph(patient_mutations,patient_outliers)

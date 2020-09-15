@@ -210,7 +210,7 @@ void betweenness_centrality(
 	cout << "# of edges (*G) " << (*G).number_of_edges() << endl;
 
 
-	cout << "single shortest path using DFS starts" << endl;
+	cout << "single shortest path using BFS starts" << endl;
 	std::map<int, float> sigma, dist, delta;
 	list<int> stack;
 	std::map<int, list<int>> pred;
@@ -283,10 +283,7 @@ int main(int argc, char *argv[]) {
 	edge e;
 	node n;
 	string patient;
-	string file = "../data/InfluenceMatrix";
-
-	leda::string folder = argv[1];
-	string directory_name ="../data/"+ folder;
+	string file = "../data/IntAct_network.txt
 	int weight_key = 1;
 	int counter = 0;
 

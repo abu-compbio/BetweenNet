@@ -7,7 +7,7 @@ from tqdm import tqdm
 import numpy as np
 from scipy.stats import truncnorm
 from scipy.optimize import fmin_slsqp
-numpy.seterr(divide = 'ignore')
+np.seterr(divide = 'ignore')
 
 
 def tumorOrNormal(s):
@@ -15,6 +15,80 @@ def tumorOrNormal(s):
         return "normal_bw_"
     else:
         return "tumor_bw_"
+
+
+def calculate_BW_difference(genes,directory):
+    patients = os.listdir(directory)
+    print("calculate BW differences started")
+
+
+    patient_treated = []
+
+    bw_diff_values = {}
+    bw_diff_values['patients']=[]
+    for gene in genes:
+        bw_diff_values[gene]=[]
+
+    count_patient=0
+    for patient in patients:
+
+        if "Icon" in patient or "DS_Store" in patient:
+            continue
+        #check if patient already treated
+        print(patient)
+        if patient.split("_bw_")[1].split(".tgenet")[0] in patient_treated:
+            continue
+
+        normal_bw_values = copy.deepcopy(bw_diff_values)
+        tumor_bw_values = copy.deepcopy(bw_diff_values)
+        #append the patient name to the treated list
+        patient_treated.append(patient.split("_bw_")[1].split(".tgenet")[0])
+
+        #reading data from the first file
+        with open(directory + "/" + patient) as file1:
+            list1 = []
+            for line in file1.readlines():
+
+                if len(line.strip().split(':')[0]) == 0:
+                    continue
+                normal_bw_values[line.strip().split('\t:\t')[0]] = float(line.strip().split('\t:\t')[1])
+
+
+        #reading data from the second file by checking if the first one was normal or tumor
+        try:
+            file2 = open(directory + "/" + tumorOrNormal(patient.split('_bw_')[0])+patient.split('_bw_')[1])
+        except:
+            continue
+        list2 = []
+        for line in file2.readlines():
+            if len(line.strip().split(':')[0]) == 0:
+                continue
+            tumor_bw_values[line.strip().split('\t:\t')[0]] = float(line.strip().split('\t:\t')[1])
+
+
+
+        bw_diff_values['patients'].append(patient.split('_bw_')[1].split('.')[0])
+
+        for gene in genes:
+
+
+            if (type(normal_bw_values[gene]) is list) or type(tumor_bw_values[gene]) is list:
+                normal_bw_values[gene]=0
+                tumor_bw_values[gene]=0
+
+
+
+            bw_diff_values[gene].append(abs(normal_bw_values[gene] - tumor_bw_values[gene]))
+
+        count_patient+=1
+
+
+
+
+
+
+    print("calculate BwC differences finished")
+    return bw_diff_values
 
 def load_gene_list(gene_list_input):
     human_genes_list=[]
@@ -66,7 +140,7 @@ def generate_outliers_matrix(bw_diff_matrix,genes_standard_deviation_mean):
         patient_outliers_dic[gene]={}
         for patient in patients:
             #if gene in genes_standard_deviation_mean:
-            if bw_diff_matrix[gene][patient]<=genes_standard_deviation_mean[gene][0]+genes_standard_deviation_mean[gene][1]:
+            if bw_diff_matrix[gene][patient]<=(0.5*genes_standard_deviation_mean[gene][0])+genes_standard_deviation_mean[gene][1]:
                 patient_outliers_dic[gene][patient]=False
             else:
                 patient_outliers_dic[gene][patient]=True
