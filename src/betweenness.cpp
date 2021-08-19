@@ -1,6 +1,6 @@
-// g++-5 -std=c++0x -I$LEDAROOT/incl -L$LEDAROOT betweenness.cpp -lGeoW -lD3 -lW -lP -lG -lL -lX11 -lm -O1 -no-pie -o betweenness
-#include "common.h"
+// g++-5 -std=c++0x -I$LEDAROOT/incl -L$LEDAROOT betweenness.cpp -lGeoW -lD3 -lW -lP -lG -lL -lX11 -lm -O1 -no-pie -o betweenness.out
 
+#include "common.h"
 // helper method for spliting line into tokens
 std::vector<std::string> splitLine(const std::string& str, const char& ch) {
 
@@ -96,7 +96,7 @@ void construct_normal_tumor_networks(
 	map<int, int> *tumor_edge_map,					// <original edge, virtal edge>	 for tumor graph
 	std::map<int, std::string> *normal_nodes_map_rev,	// map<index(node), node label> for normal graph
 	std::map<int, std::string> *tumor_nodes_map_rev,	// map<index(node), node label> for tumor graph
-	string directory_name,
+	string input_data,
 	string filein){
 
 
@@ -145,7 +145,7 @@ void construct_normal_tumor_networks(
 
 	// getting all patient normal and tumor genes
 	int checkLine = 0;
-	std::ifstream conv_reader(directory_name + "/" + filein); //reading the file for patient p
+	std::ifstream conv_reader(input_data + "/" + filein); //reading the file for patient p
 	std::string line;
 	list <std::string> gene_data_normal, gene_data_tumor; //a list to store genes in the normal graph and tumor graph
 	std::vector<std::string> line_vector, words_vector;
@@ -276,8 +276,14 @@ int main(int argc, char *argv[]) {
 	node n;
 	string patient;
 
+
 	string ppi_file = "../data/IntAct_network.txt";
-	string directory_name = "../data/BRCA/betweenness_input/";
+	leda::string cancer_type = argv[1];
+	
+	string input_data = "../data/"+cancer_type+"/betweenness_input/";
+
+
+
 	int weight_key = 1;
 	int counter = 0;
 
@@ -288,7 +294,7 @@ int main(int argc, char *argv[]) {
 	intActDataGraph(ppi_file, &intActGraph, &nodes_map_rev, &edge_weight_map, weight_key);
 	cout << "\n ## 1- PPI Network Generated with " << intActGraph.number_of_nodes() << " and " << intActGraph.number_of_edges() << endl;;
 
-	list<string> files = get_files(directory_name);
+	list<string> files = get_files(input_data);
 	forall(patient, files) {
 
 		graph tumorGraph, normalGraph;
@@ -306,7 +312,7 @@ int main(int argc, char *argv[]) {
 			nodes_map_rev,
 			&normal_edge_map, &tumor_edge_map,
 			&normal_nodes_map_rev, &tumor_nodes_map_rev,
-			directory_name,
+			input_data,
 			patient);
 
 		cout << "Normal and Tumor Network Construction Finished\n\n";
@@ -320,7 +326,7 @@ int main(int argc, char *argv[]) {
 		betweenness_centrality(&bw_n, &normal_nodes_map_rev, &normal_edge_map, &normalGraph);
 		cout << "Normal Betweenness Calculated\n";
 
-		std::ofstream bw_normal_output("../out/LUNG/Betweenness/normal_bw_" + patient);
+		std::ofstream bw_normal_output("../out/"+cancer_type+"/Betweenness/normal_bw_" + patient);
 		if (bw_normal_output.is_open())
 			for (std::map<int, std::string>::iterator it = normal_nodes_map_rev.begin(); it != normal_nodes_map_rev.end(); ++it)
 				if ((it -> second).find("virt") != 0)
@@ -336,7 +342,7 @@ int main(int argc, char *argv[]) {
   	start = clock();
 		betweenness_centrality(&bw_t, &tumor_nodes_map_rev, &tumor_edge_map, &tumorGraph);
 		cout << "Tumor Betweenness Calculated\n";
-		std::ofstream bw_tumor_output("../out/LUNG/Betweenness/tumor_bw_" + patient);
+		std::ofstream bw_tumor_output("../out/"+cancer_type+"/Betweenness/tumor_bw_" + patient);
 		if (bw_tumor_output.is_open())
 			for (std::map<int, std::string>::iterator it = tumor_nodes_map_rev.begin(); it != tumor_nodes_map_rev.end(); ++it)
 				if ((it -> second).find("virt") != 0)

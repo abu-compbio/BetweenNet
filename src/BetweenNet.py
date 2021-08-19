@@ -1,5 +1,5 @@
 #***********************************
-# Run the command 'python BetweenNet.py' in the Terminal to start the
+# Run the command 'python BetweenNet.py [cacner] -v-[t/f]' in the Terminal to start the
 # the process of ranking mutated genes in the bipartite graph
 #
 # This may take several minutes.
@@ -25,7 +25,7 @@ def load_gene_names():
 
 def evaluate_matrix(random_walk_matrix):
 
-    #sum weights of the incoming edges (sum of entire column of the corresponding gene)
+    #sum weights of the incoming edges (sum of entire row of the corresponding gene)
     final_score=np.sum(random_walk_matrix, axis=1)
 
     #map scores to gene names
@@ -35,7 +35,7 @@ def evaluate_matrix(random_walk_matrix):
         score2id[gene]=final_score[int(gene_index[gene])]
     global rw_scores
 
-    #select only score of the mutated genes
+    #select only scores of the mutated genes
     rw_scores={}
     for g in sorted(score2id.items(), key=lambda x: x[1],reverse=True):
         if len(g[0].split("_"))==1:
@@ -63,7 +63,7 @@ def rank_mutated_genes(rank):
                 max_degree=max([G.degree(mutated_gene) for mutated_gene in  bipartite0_mutations])
 
                 for mutated_gene in bipartite0_mutations:
-                    #retreice the degree of the selected mutated gene
+                    #compute the degree of the selected mutated gene
                     mutated_gene_degree=G.degree(mutated_gene)
                     # get the edge weight of the mutated gene m after random walk
                     rw_score=rw_scores[mutated_gene]/max_rw_score

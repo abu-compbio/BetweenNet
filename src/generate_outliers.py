@@ -1,5 +1,5 @@
 #***********************************
-# Run the command 'python generate_outliers.py' in the Terminal to start the
+# Run the command 'python generate_outliers.py [cancer] -v-[t/f]' in the Terminal to start the
 # the process of evaluating the betweenness values and generate the set of
 # dysrgulated genes for each patient by fitting a truncated normal distribution
 # This may take several minutes.
@@ -25,7 +25,7 @@ def calculate_BW_difference(genes,directory):
     # list of already treated samples
     patient_treated = []
 
-    #dictionary to save the bw diff values
+    #dictionary to store the betweenness diff. values
     bw_diff_values = {}
     #first key is the patient ids
     bw_diff_values['patients']=[]
@@ -79,7 +79,7 @@ def calculate_BW_difference(genes,directory):
             tumor_bw_values[line.strip().split('\t:\t')[0]] = float(line.strip().split('\t:\t')[1])
 
 
-        #store the data to the created dictionary
+        #store the data in the created dictionary
         bw_diff_values['patients'].append(patient_id)
         # calculate betweenness difference
         for gene in genes:
@@ -131,7 +131,6 @@ def generate_outliers_matrix(bw_diff_matrix,genes_standard_deviation_mean):
     patients=[pat for pat in bw_diff_matrix["patients"]]
     bw_diff_matrix=bw_diff_matrix.set_index("patients")
 
-    #print(bw_diff_matrix.head())
     patient_outliers_dic={}
     for gene in bw_diff_matrix:
         if gene == "patients":

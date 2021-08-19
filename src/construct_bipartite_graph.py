@@ -1,5 +1,5 @@
 #***********************************
-# Run the command 'python construct_bipartite_graph.py' in the Terminal to start the
+# Run the command 'python construct_bipartite_graph.py [cancer] -v-[t/f]' in the Terminal to start the
 # the process of constructing the bipartite network and generate input data for random walk process
 # This may take several minutes.
 # When is done, the files of prepared data are saved in the subfolders of out/[cacner]/.
@@ -40,17 +40,17 @@ class DataPreprocessing:
             #dictionary to store patient and its set of mutated genes
             patients_vs_mutations={}
 
-            #dictionary to store mutated genes and set of samples, it is used to calculate mutation frequancies
+            #dictionary to store mutated genes and the set of samples, it is used to calculate mutation frequancies
             mutations_vs_patients={}
 
-            # set of all mutations to construc bipartite graph
+            # set of all mutations to construct the bipartite graph
             all_mutations=set()
 
             for line in mutation_data.readlines():
                 patient_id=line.strip().split("\t")[0]
                 patients.append(patient_id)
 
-                #list of mutated genes2
+                #list of mutated genes
                 genes=line.strip().split("\t")[1].split(",")
 
                 for gene in genes:
@@ -137,7 +137,7 @@ class Graph:
         bipartite1_nodes = {n for n, d in G.nodes(data=True) if d['bipartite']==1}
         bipartite0_nodes = {n for n, d in G.nodes(data=True) if d['bipartite']==0}
 
-        #deleting nodes with 0 degree
+        #removing nodes with 0 degree
         for node in bipartite1_nodes:
             if int(G.degree(node))==0:
                 G.remove_node(node)
@@ -185,7 +185,7 @@ def main():
     bipartite1_nodes = {n for n, d in G.nodes(data=True) if d['bipartite']==1}
 
 
-    #genereate index of gene for random walk algorithm
+    #genereate index of genes for random walk algorithm
     gene_id_map={}
     id=1
     output_index_file=open("../out/"+cancer_type+"/graph_nodes.txt","w")
@@ -202,7 +202,7 @@ def main():
     output_index_file.close()
 
 
-    #genereate index of edges for random walk algorithm
+    #genereate index of edges for random walk process
     output_edge_file=open("../out/"+cancer_type+"/graph_edges.txt","w")
     edges_set=set()
     edges=G.edges()
