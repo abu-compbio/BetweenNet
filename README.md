@@ -104,7 +104,7 @@ Files will be located at out/ <br/>
 4-out/ [ cancer ] /bipartite_graph.gml<br/>
 
 
-## **Construction Of Bipartite Graph**
+## ** **
 To construct the bopartite graph, run "construct_bipartite_graph.py" script, as follows:
 ```
 python construct_bipartite_graph.py [cancer] -v-[t/f]
