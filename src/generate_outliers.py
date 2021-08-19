@@ -1,3 +1,11 @@
+#***********************************
+# Run the command 'python generate_outliers.py' in the Terminal to start the
+# the process of evaluating the betweenness values and generate the set of
+# dysrgulated genes for each patient by fitting a truncated normal distribution
+# This may take several minutes.
+# When is done, the files of prepared data are saved in the subfolders of data/[cacner]/.
+#***********************************
+
 #generate outliers
 import sys
 import pandas as pd
@@ -6,88 +14,81 @@ import copy
 from tqdm import tqdm
 import numpy as np
 from scipy.stats import truncnorm
-from scipy.optimize import fmin_slsqp
-np.seterr(divide = 'ignore')
 
-
-def tumorOrNormal(s):
-    if s == "tumor":
-        return "normal_bw_"
-    else:
-        return "tumor_bw_"
 
 
 def calculate_BW_difference(genes,directory):
     patients = os.listdir(directory)
-    print("calculate BW differences started")
+    if verbose:
+        print("     Computing BW Differences: STARTED")
 
-
+    # list of already treated samples
     patient_treated = []
 
+    #dictionary to save the bw diff values
     bw_diff_values = {}
+    #first key is the patient ids
     bw_diff_values['patients']=[]
+
+    #add genes in TCGA as keys to the dictionary
     for gene in genes:
         bw_diff_values[gene]=[]
 
-    count_patient=0
+    if verbose:
+        pbar=tqdm(total=len(patients))
     for patient in patients:
-
-        if "Icon" in patient or "DS_Store" in patient:
+        if verbose:
+            pbar.update(1)
+        if ".txt" not in patient:
             continue
+
+        #retreive patient id from the file name
+        patient_id=patient.split("_bw_")[1].split(".txt")[0]
+
         #check if patient already treated
-        print(patient)
-        if patient.split("_bw_")[1].split(".tgenet")[0] in patient_treated:
+        if patient_id in patient_treated:
             continue
 
-        normal_bw_values = copy.deepcopy(bw_diff_values)
-        tumor_bw_values = copy.deepcopy(bw_diff_values)
         #append the patient name to the treated list
-        patient_treated.append(patient.split("_bw_")[1].split(".tgenet")[0])
+        patient_treated.append(patient_id)
 
-        #reading data from the first file
-        with open(directory + "/" + patient) as file1:
-            list1 = []
+        #create a dictionary to store patient p's betweenness values
+        normal_bw_values = {g:-1 for g in genes}
+        tumor_bw_values = {g:-1 for g in genes}
+
+
+
+        #reading data from the first file (Normal graph)
+        with open(directory + "/normal_bw_" + patient_id+".txt") as file1:
             for line in file1.readlines():
-
                 if len(line.strip().split(':')[0]) == 0:
                     continue
                 normal_bw_values[line.strip().split('\t:\t')[0]] = float(line.strip().split('\t:\t')[1])
 
 
-        #reading data from the second file by checking if the first one was normal or tumor
+        #reading data from the first file (Tumor graph)
         try:
-            file2 = open(directory + "/" + tumorOrNormal(patient.split('_bw_')[0])+patient.split('_bw_')[1])
+            file2 = open(directory + "/tumor_bw_" + patient_id+".txt")
         except:
+
+            print("ERROR missing tumor file for patient: ",patient_id)
             continue
-        list2 = []
         for line in file2.readlines():
             if len(line.strip().split(':')[0]) == 0:
                 continue
             tumor_bw_values[line.strip().split('\t:\t')[0]] = float(line.strip().split('\t:\t')[1])
 
 
-
-        bw_diff_values['patients'].append(patient.split('_bw_')[1].split('.')[0])
-
+        #store the data to the created dictionary
+        bw_diff_values['patients'].append(patient_id)
+        # calculate betweenness difference
         for gene in genes:
-
-
-            if (type(normal_bw_values[gene]) is list) or type(tumor_bw_values[gene]) is list:
+            if normal_bw_values[gene]==-1 or tumor_bw_values[gene] ==-1:
                 normal_bw_values[gene]=0
                 tumor_bw_values[gene]=0
-
-
-
             bw_diff_values[gene].append(abs(normal_bw_values[gene] - tumor_bw_values[gene]))
-
-        count_patient+=1
-
-
-
-
-
-
-    print("calculate BwC differences finished")
+    if verbose:
+        print("     Computing BW Differences: DONE")
     return bw_diff_values
 
 def load_gene_list(gene_list_input):
@@ -100,78 +101,73 @@ def load_gene_list(gene_list_input):
     gene_list_file.close()
     return human_genes_list
 
-
-
 def calculate_mean_std_values(bw_diff_matrix):
-
-    print("\nCalculate Meand and Standard deviations: started")
+    if verbose:
+        print("\n     Computing Mean and Standard deviations: STARTED")
     bw_diff_matrix=bw_diff_matrix.set_index("patients")
     genes_standard_deviation_mean={}
 
-    pbar = tqdm(range(len([gene for gene in bw_diff_matrix])))
+    if verbose:
+        pbar = tqdm(range(len([gene for gene in bw_diff_matrix])))
 
     for gene in bw_diff_matrix:
-        pbar.update(1)
+        if verbose:
+            pbar.update(1)
         data_specefic_gene=bw_diff_matrix[gene].tolist()
         data_specefic_gene_sorted=sorted([x for x in data_specefic_gene])
 
         truncnorm_fit=truncnorm.fit(data_specefic_gene_sorted, fix_a=0, fix_b=max(data_specefic_gene), loc=0, scale=1)
-        std_value=truncnorm_fit[3]
         mean_value=truncnorm_fit[2]
+        std_value=truncnorm_fit[3]
 
         genes_standard_deviation_mean[gene]=(std_value,mean_value)
-
-    print("\nCalculate Meand and Standard deviations: done")
-    print("*************************************************\n\n\n")
+    if verbose:
+        print("\n     Computing  Mean and Standard deviations: DONE")
     return genes_standard_deviation_mean
 
 def generate_outliers_matrix(bw_diff_matrix,genes_standard_deviation_mean):
-    print("\nGenerating outliers matrix: started")
+    if verbose:
+        print("\n     Generating Outliers matrix: STARTED")
     patients=[pat for pat in bw_diff_matrix["patients"]]
     bw_diff_matrix=bw_diff_matrix.set_index("patients")
 
-
-
-    print(bw_diff_matrix.head())
+    #print(bw_diff_matrix.head())
     patient_outliers_dic={}
     for gene in bw_diff_matrix:
         if gene == "patients":
             continue
         patient_outliers_dic[gene]={}
         for patient in patients:
-            #if gene in genes_standard_deviation_mean:
             if bw_diff_matrix[gene][patient]<=(0.5*genes_standard_deviation_mean[gene][0])+genes_standard_deviation_mean[gene][1]:
                 patient_outliers_dic[gene][patient]=False
             else:
                 patient_outliers_dic[gene][patient]=True
-    print("\nGenerating outliers matrix: done")
-    print("*************************************************\n\n\n")
+    if verbose:
+        print("\n     Generating Outliers matrix: DONE")
     return patient_outliers_dic
 
 
 def main():
-    global input_directory
-    # count the arguments
-    arguments = len(sys.argv) - 1
-    if arguments < 3:
-        print("________________________________________________________________________________________")
-        print('Please run the code using the following command line and Arguments:  ')
-        print("python generate_outliers.py [Input directory] [Betweenness Results Path] [Genes list]")
-        print("________________________________________________________________________________________\n\n")
-        sys.exit("")
+    global input_directory,verbose
+    input_directory="data"
+    if len(sys.argv) > 1:
+        cancer_type=sys.argv[1]
+        v=sys.argv[2].split("-v-")[1]
+        if v=='t':
+            verbose=True
+        else:
+            verbose=False
 
-
-    input_directory=sys.argv[1]
-    btw_results_path=sys.argv[2]
-    gene_list_input=sys.argv[3]
+    btw_results_path="Betweenness"
+    gene_list_input="human_genes"
 
     #list files
     file_list=[]
-    for file in os.listdir("../out/"+btw_results_path):
+    for file in os.listdir("../out/"+cancer_type+"/"+btw_results_path):
         file_list.append("../out/"+btw_results_path+"/"+file)
 
     genes_list=load_gene_list(gene_list_input)
-    bw_diff=calculate_BW_difference(genes_list,"../out/"+btw_results_path)
+    bw_diff=calculate_BW_difference(genes_list,"../out/"+cancer_type+"/"+btw_results_path)
 
     #convert dictionary to pandas matrix
     bw_diff_matrix = pd.DataFrame(bw_diff)
@@ -183,11 +179,9 @@ def main():
     list_outliers=generate_outliers_matrix(bw_diff_matrix,genes_standard_deviation_mean)
 
     outliers_matrix=pd.DataFrame.from_dict(list_outliers)
-    outliers_matrix.to_csv("../data/OutliersMatrix.csv")
+    outliers_matrix.to_csv("../data/"+cancer_type+"/outliers_data.csv")
 
-    print("*************************************************")
-    print("*                Successfuly Done               *")
-    print("*************************************************")
+
 
 
 if __name__ == "__main__":

@@ -5,6 +5,8 @@
 # python libraries are numpy, scipy and networkx. The
 # input files are provided within the data folder.
 cd src
+cancer_type="BRCA"
+verbose=f #if "t", then all steps will be displayed in terminal
 
 
 #########################################################
@@ -13,10 +15,11 @@ cd src
 #
 #########################################################
 
-
-printf "Compute Betweenness Values...\n\n"
-
-./betweeness data/Betweenness
+printf "################################################\n"
+printf "    1 - Betweenness Calculation...\n"
+printf "################################################\n\n\n"
+#g++-5 -std=c++0x -I$LEDAROOT/incl -L$LEDAROOT betweenness.cpp -lGeoW -lD3 -lW -lP -lG -lL -lX11 -lm -O1 -no-pie -o betweenness
+#./betweeness cancer_type
 
 #########################################################
 #
@@ -24,11 +27,15 @@ printf "Compute Betweenness Values...\n\n"
 #
 #########################################################
 
+printf "################################################\n"
+printf "    2 - Selection of Outliers...\n"
+printf "################################################\n\n\n"
+#python generate_outliers.py $cancer_type -v-$verbose
 
-printf "Generate Data for Random Walk...\n\n"
-
-python generate_outliers.py data Betweenness human_genes
-python construct_bipartite_graph.py data patient_ids IntAct_network BRCA_mutations OutliersMatrix
+printf "################################################\n"
+printf "    3 - Constructing Bipartite Graph ...\n"
+printf "################################################\n\n\n"
+#python construct_bipartite_graph.py $cancer_type -v-$verbose
 
 #########################################################
 #
@@ -36,10 +43,11 @@ python construct_bipartite_graph.py data patient_ids IntAct_network BRCA_mutatio
 #
 #########################################################
 
+printf "################################################\n"
+printf "    4 - Random Walk Process...\n"
+printf "################################################\n\n\n"
 
-printf "\nRunning Random Walk...\n\n"
-
-python random_walk.py
+python random_walk.py $cancer_type -v-$verbose
 
 
 #########################################################
@@ -49,7 +57,8 @@ python random_walk.py
 #########################################################
 
 
-printf "\nFinding Connected Components...\n\n"
-
-python rank_genes.py
+printf "################################################\n"
+printf "    5 - Ranking Mutated Genes...\n"
+printf "################################################\n\n\n"
+python BetweenNet.py cancer_type -v-$verbose
 printf "\nDONE!!!\n"
