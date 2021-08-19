@@ -7,7 +7,7 @@
 cd src
 cancer_type="BRCA"
 verbose=f #if "t", then all steps will be displayed in terminal
-
+mkdir "../out/"$cancer_type
 
 #########################################################
 #
@@ -30,12 +30,12 @@ printf "################################################\n\n\n"
 printf "################################################\n"
 printf "    2 - Selection of Outliers...\n"
 printf "################################################\n\n\n"
-#python generate_outliers.py $cancer_type -v-$verbose
+python generate_outliers.py $cancer_type -v-$verbose
 
 printf "################################################\n"
 printf "    3 - Constructing Bipartite Graph ...\n"
 printf "################################################\n\n\n"
-#python construct_bipartite_graph.py $cancer_type -v-$verbose
+python construct_bipartite_graph.py $cancer_type -v-$verbose
 
 #########################################################
 #
