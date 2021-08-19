@@ -136,9 +136,9 @@ A2M 0.0128617363344
 A4GALT 0.00064308681672
 ```
 
-To apply random walk process on the generated bipartite graph, run random_salk.py script, as follows:
+To apply random walk process on the generated bipartite graph, run random_walk.py script, as follows:
 ```
-python random_salk.py [cancer] -v-[t/f]
+python random_walk.py [cancer] -v-[t/f]
 ```
 
 
