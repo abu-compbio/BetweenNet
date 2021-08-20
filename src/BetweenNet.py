@@ -58,7 +58,7 @@ def rank_mutated_genes(rank):
             while (len(bipartite1_nodes)!=0):
                 bipartite0_mutations= {n for n, d in G.nodes(data=True) if d['bipartite']==0}
 
-
+                m_scores={}
                 # compute max degree
                 max_degree=max([G.degree(mutated_gene) for mutated_gene in  bipartite0_mutations])
 
@@ -68,10 +68,10 @@ def rank_mutated_genes(rank):
                     # get the edge weight of the mutated gene m after random walk
                     rw_score=rw_scores[mutated_gene]/max_rw_score
                     #calculate the score of the mutated gene
-                    all_mutation_degrees[mutated_gene]=alpha*(mutated_gene_degree/max_degree)+(1.0-alpha)*rw_score
+                    m_scores[mutated_gene]=alpha*(mutated_gene_degree/max_degree)+(1.0-alpha)*rw_score
 
                 #sort mutated genes based on their scores
-                sorted_mutation_list= [k for k, v in sorted(all_mutation_degrees.items(), key=lambda kv: (-kv[1], kv[0]))]
+                sorted_mutation_list= [k for k, v in sorted(m_scores.items(), key=lambda kv: (-kv[1], kv[0]))]
 
 
 
@@ -88,6 +88,7 @@ def rank_mutated_genes(rank):
 
                 ofile.write(node_to_remove)
                 ofile.write(str("\n"))
+
 
 
 
