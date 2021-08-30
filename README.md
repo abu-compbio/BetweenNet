@@ -14,7 +14,7 @@ pip install -r requirements.txt
 
 1. The PPI network file:
 
-The file is located in data/IntAct_network
+The file is located at data/IntAct_network
 
 ```
 gene1 gene2 confidence value
@@ -25,7 +25,7 @@ MYC MAX 0.98
 ```
 2. Patients Dataset (Normal and Tumor):
 
-Files are located in data/[cancer]/betweenness_input/
+Files are located at data/[cancer]/betweenness_input/
 ```
 gene_id        TCGA-A7-A0CE-01A    gene_id        TCGA-A7-A0CE-11A
 ACIN1|22985    2916.8574           ACIN1|22985    3377.1429
@@ -49,7 +49,7 @@ g++-5 -std=c++0x -I$LEDAROOT/incl -L$LEDAROOT betweenness.cpp -lGeoW -lD3 -lW -l
 ```
 
 ####**Output**
-Files will be located in out/[cancer]/Betweenness <br/>
+Files will be located at out/[cancer]/Betweenness <br/>
 Ex: TCGA-22-5478-01.txt
 ```
 Gene         Betweenness value
@@ -68,7 +68,7 @@ AAGAB   :    904.682
 
 ### **Input**
 1. Mutation Data
-The file is located in data/[ cancer ]/mutation_data.txt
+The file is located at data/[ cancer ]/mutation_data.txt
 
 ```
 p1      g1 g2 g6 .... gn
@@ -80,7 +80,7 @@ p3      g3 g1 g16 .... gn
 
 2. Outliers Data
 The file contains a matrix of outlier genes.
-The file is located in data/ [ cancer ] /outliers_data.csv
+The file is located at data/ [ cancer ] /outliers_data.csv
 
 ```
 Genes   g1      g2      g3     ...  gn
@@ -114,14 +114,14 @@ python construct_bipartite_graph.py [cancer] -v-[t/f]
 ### **Input**
 
 1 - The nodes to index file mapping:
-The file is located in out/graph_nodes.txt
+The file is located at out/graph_nodes.txt
 ```
 index GeneName
 1 A1BG
 2 A1CF
 ```
 2 - Bipartite edges file:
-The file is located in out/graph_edges.txt
+The file is located at out/graph_edges.txt
 ```
 node_i_Index node_j_Index weight
 0 1 1
