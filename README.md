@@ -111,6 +111,7 @@ python construct_bipartite_graph.py [cancer] -v-[t/f]
 ```
 
 ## **Random Walk**
+**Note:** For the random walk process, we used the random walk python code for both breast and lung datasets, and the iterative version (described in our paper) for pan-cancer dataset) for three iterations.
 ### **Input**
 
 1 - The nodes to index file mapping:
