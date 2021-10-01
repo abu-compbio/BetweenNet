@@ -43,7 +43,7 @@ def evaluate_matrix(random_walk_matrix):
 
     return rw_scores
 
-def rank_mutated_genes(rank):
+def rank_mutated_genes(rw_scores):
 
     G=nx.read_gml("../out/"+cancer_type+"/bipartite_graph.gml")
     max_rw_score=rw_scores[max(mut_rw_score, key=mut_rw_score.get)]
@@ -99,7 +99,8 @@ def main():
         cancer_type=sys.argv[1]
     random_walk_matrix=load_matrix()
     rw_scores = evaluate_matrix(random_walk_matrix)
-    rank_mutated_genes(rw_scores)
+    
+    _mutated_genes(rw_scores)
 
 
 if __name__ == "__main__":
