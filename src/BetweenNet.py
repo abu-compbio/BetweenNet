@@ -46,7 +46,7 @@ def evaluate_matrix(random_walk_matrix):
 def rank_mutated_genes(rw_scores):
 
     G=nx.read_gml("../out/"+cancer_type+"/bipartite_graph.gml")
-    max_rw_score=rw_scores[max(mut_rw_score, key=rw_scores.get)]
+    max_rw_score=rw_scores[max(rw_scores, key=rw_scores.get)]
     with open("../out/"+cancer_type+"/BetweenNet.txt","w") as ofile:
 
 
