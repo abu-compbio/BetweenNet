@@ -4,6 +4,7 @@
 # Or directly run this file in your chosen IDE.
 # This may take several hours.
 # When is done, the files of prepared data are saved in the subfolders of out/[cacner]/.
+NOTE: we used this code for both breast and lung cancer datasets
 #***********************************
 
 
