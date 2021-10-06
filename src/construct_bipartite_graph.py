@@ -88,9 +88,10 @@ class DataPreprocessing:
                 patient_vs_outliers[p]=outliers_for_spec_patient
                 for g in outliers_for_spec_patient:
                     if g not in outliers_vs_patient:
-                        outliers_vs_patient[g]=[p]
+                        outliers_vs_patient[g]=set()
+                        outliers_vs_patient[g].add(p)
                     else:
-                        outliers_vs_patient[g].append([p])
+                        outliers_vs_patient[g].add(p)
 
         for p in patient_vs_outliers:
             for outlier in patient_vs_outliers[p]:
@@ -124,13 +125,13 @@ class Graph:
                     #check if the node exist in the PPI
                     if outlier in inf_graph:
                         # if the outlier gene is also mutated then skip.
-                        if outlier not in patient_mutations[p]:
-                            #for m mutated in p
-                            for mutation in patient_mutations[p]:
-                                if mutation in inf_graph:
-                                    if mutation in inf_graph[outlier]:
-                                        outlier_=outlier+str("_")+p
-                                        G.add_edges_from([(mutation,outlier_ )])
+                        #if outlier not in patient_mutations[p]:
+                        #for m mutated in p
+                        for mutation in patient_mutations[p]:
+                            if mutation in inf_graph:
+                                if mutation in inf_graph[outlier]:
+                                    outlier_=outlier+str("_")+p
+                                    G.add_edges_from([(mutation,outlier_ )])
 
             else:
                 print("Errorr Missing Patient: ",p)
