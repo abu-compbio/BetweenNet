@@ -83,8 +83,9 @@ void intActDataGraph(
 		}
 	conv_reader1.close();
 
-	Make_Simple((*intActGraph));
+	
 	(*intActGraph).make_undirected();
+	Make_Simple((*intActGraph));
 	(*intActGraph).write_gml("..out//intact_graph.gml");
 }
 
