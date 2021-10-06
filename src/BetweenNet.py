@@ -100,7 +100,7 @@ def main():
     random_walk_matrix=load_matrix()
     rw_scores = evaluate_matrix(random_walk_matrix)
     
-    _mutated_genes(rw_scores)
+    rank_mutated_genes(rw_scores)
 
 
 if __name__ == "__main__":
