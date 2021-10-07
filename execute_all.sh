@@ -60,5 +60,5 @@ python random_walk.py $cancer_type -v-$verbose
 printf "################################################\n"
 printf "    5 - Ranking Mutated Genes...\n"
 printf "################################################\n\n\n"
-python BetweenNet.py cancer_type -v-$verbose
+python BetweenNet.py $cancer_type -v-$verbose
 printf "\nDONE!!!\n"
