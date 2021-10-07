@@ -10,6 +10,7 @@
 import scipy.sparse as sp
 import numpy as np
 import networkx as nx
+import sys
 
 def load_matrix():
     e=sp.load_npz("../out/"+cancer_type+"/random_walk_e_matrix.npz")
