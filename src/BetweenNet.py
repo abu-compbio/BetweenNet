@@ -95,7 +95,7 @@ def rank_mutated_genes(rw_scores):
 
 
 def main():
-    global random_walk_matrix
+    global random_walk_matrix,cancer_type
     if len(sys.argv) > 1:
         cancer_type=sys.argv[1]
     random_walk_matrix=load_matrix()
